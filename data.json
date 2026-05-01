@@ -1,0 +1,129 @@
+{
+  "config": {
+    "nombreProducto": "IDEARIUM",
+    "subtitulo": "Banco de proyectos del circulo",
+    "adminWhatsApp": "5491100000000",
+    "adminNombre": "Franco",
+    "password": "password",
+    "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+    "passwordHint": "La contrasena por defecto es: password — cambiala en data.json antes de compartir."
+  },
+  "ideas": [
+    {
+      "id": "idea-0001",
+      "miembro": "[Nombre Apellido — ejemplo 1]",
+      "numeroSocio": "M-0001",
+      "fechaCarga": "2026-04-15",
+      "estado": "buscando socios",
+      "rubro": "tecnologia",
+      "titulo": "Plataforma de telemedicina para zonas rurales del NEA",
+      "empresa": "MedeRural (en formacion)",
+      "descripcion": "Sistema de teleconsultas que opera con conectividad intermitente. Almacena consultas localmente y sincroniza cuando hay senal. Pensado para postas sanitarias rurales con un agente capacitado. Modelo B2G + suscripcion para obras sociales rurales.",
+      "buscando": ["co-founder tecnico", "validacion clinica", "mentoria regulatoria"],
+      "telefono": "+54 9 11 0000 0001",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0002",
+      "miembro": "[Nombre Apellido — ejemplo 2]",
+      "numeroSocio": "M-0014",
+      "fechaCarga": "2026-04-20",
+      "estado": "en marcha",
+      "rubro": "industria",
+      "titulo": "Optimizacion de ruteo logistico con datos en tiempo real",
+      "empresa": "RutaViva SAS",
+      "descripcion": "Software ya operativo con 4 clientes pyme. Reduce kilometros recorridos en distribucion urbana usando trafico, ventanas de entrega y restricciones de carga. Buscamos escalar a operadores logisticos medianos.",
+      "buscando": ["inversor seed", "talento comercial b2b"],
+      "telefono": "+54 9 11 0000 0002",
+      "compartirTelefono": false
+    },
+    {
+      "id": "idea-0003",
+      "miembro": "[Nombre Apellido — ejemplo 3]",
+      "numeroSocio": "M-0027",
+      "fechaCarga": "2026-04-22",
+      "estado": "exploracion",
+      "rubro": "energia",
+      "titulo": "Generacion solar distribuida con financiamiento comunitario",
+      "empresa": null,
+      "descripcion": "Modelo donde un grupo de vecinos co-financia un parque solar barrial y cobra parte del ahorro generado. Hay marco regulatorio nuevo en provincia de Buenos Aires que lo habilita. Estoy explorando la viabilidad financiera y los aspectos legales antes de avanzar.",
+      "buscando": ["feedback regulatorio", "co-founder financiero", "experiencia con cooperativas"],
+      "telefono": "+54 9 11 0000 0003",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0004",
+      "miembro": "[Nombre Apellido — ejemplo 4]",
+      "numeroSocio": "M-0042",
+      "fechaCarga": "2026-04-25",
+      "estado": "idea",
+      "rubro": "educacion",
+      "titulo": "Tutorias 1:1 especializadas para chicos con alta capacidad intelectual",
+      "empresa": null,
+      "descripcion": "Plataforma de matching entre chicos identificados con perfil de alta capacidad y tutores con formacion especifica. Modelo subscripcion. Hay demanda no atendida segun mi experiencia familiar y la de varios padres del circulo.",
+      "buscando": ["co-founder pedagogico", "feedback de padres", "validacion de demanda"],
+      "telefono": "+54 9 11 0000 0004",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0005",
+      "miembro": "[Nombre Apellido — ejemplo 5]",
+      "numeroSocio": "M-0058",
+      "fechaCarga": "2026-04-28",
+      "estado": "buscando socios",
+      "rubro": "finanzas",
+      "titulo": "Capital de trabajo para microempresas usando data alternativa",
+      "empresa": "PrestaPyme (constituida)",
+      "descripcion": "Originamos prestamos de corto plazo a microempresas que no califican en banca tradicional. Usamos data de facturacion electronica de AFIP, datos de movilidad, y comportamiento de pagos en proveedores. Operamos con $3M propios; queremos escalar.",
+      "buscando": ["inversor deuda", "compliance fintech", "talento data"],
+      "telefono": "+54 9 11 0000 0005",
+      "compartirTelefono": false
+    },
+    {
+      "id": "idea-0006",
+      "miembro": "[Nombre Apellido — ejemplo 6]",
+      "numeroSocio": "M-0071",
+      "fechaCarga": "2026-04-30",
+      "estado": "exploracion",
+      "rubro": "salud",
+      "titulo": "Diagnostico temprano de patologias por analisis de voz",
+      "empresa": "VocalDx (etapa de research)",
+      "descripcion": "Investigacion aplicada — uso modelos de procesamiento de senal y aprendizaje automatico sobre muestras de voz cortas para detectar marcadores de Parkinson temprano y otras enfermedades neurodegenerativas. Hay literatura solida pero pocos productos comerciales. Necesito validar con dataset clinico real.",
+      "buscando": ["acceso a dataset clinico", "co-founder biomedico", "mentoria regulatoria FDA/ANMAT"],
+      "telefono": "+54 9 11 0000 0006",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0007",
+      "miembro": "[Nombre Apellido — ejemplo 7]",
+      "numeroSocio": "M-0089",
+      "fechaCarga": "2026-05-01",
+      "estado": "en marcha",
+      "rubro": "servicios",
+      "titulo": "Boutique de transformacion digital para pymes industriales",
+      "empresa": "Núcleo Consulting",
+      "descripcion": "Operamos hace 3 anos con 12 clientes activos en Cordoba y Santa Fe. Estamos abriendo unidad en Buenos Aires. Ofrecemos diagnostico de madurez digital + roadmap + ejecucion con equipo propio. Todos los socios son ex-CIOs o ex-CTOs.",
+      "buscando": ["talento senior tech", "alianzas con verticales", "intercambio de ideas"],
+      "telefono": "+54 9 11 0000 0007",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0008",
+      "miembro": "[Nombre Apellido — ejemplo 8]",
+      "numeroSocio": "M-0103",
+      "fechaCarga": "2026-05-01",
+      "estado": "idea",
+      "rubro": "impacto social",
+      "titulo": "Programa de mentoreo cruzado para emprendedores en barrios vulnerables",
+      "empresa": null,
+      "descripcion": "Idea: vincular emprendedores en etapa temprana de barrios vulnerables del AMBA con mentores empresariales para sesiones cortas de 1 hora cada 15 dias durante 6 meses. La novedad es el formato corto, calendarizado y con metricas de impacto medibles. Estoy buscando primero validar con potenciales mentores y emprendedores.",
+      "buscando": ["co-founder operativo", "ONG aliada", "feedback honesto"],
+      "telefono": "+54 9 11 0000 0008",
+      "compartirTelefono": false
+    }
+  ]
+}
+elefono": false
+    }
+  ]
+}

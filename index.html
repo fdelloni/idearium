@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<title>Idearium — banco de proyectos</title>
+<style>
+  /* ===== Tokens ===== */
+  :root{
+    --deep:#050714; --bg:#0A0E27; --surface:#11163A; --card:#151B45;
+    --line:#1F2755; --line-2:#2A3470;
+    --cyan:#00D9FF; --violet:#B14EFF; --magenta:#FF3D9A; --warm:#FFB454;
+    --text:#E6E8F5; --muted:#8893B8; --dim:#5A6593; --white:#F4F4FB;
+    --grad: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 50%, var(--magenta) 100%);
+    --r-sm:8px; --r-md:14px; --r-lg:24px; --r-xl:32px;
+    --shadow:0 8px 30px rgba(0,0,0,.45);
+    --display:'Space Grotesk', 'Trebuchet MS', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--deep);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{font-family:inherit}
+
+  /* ===== Ambient background ===== */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(177,78,255,.18), transparent 50%),
+      radial-gradient(ellipse at 90% 100%, rgba(0,217,255,.14), transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(255,61,154,.06), transparent 60%);
+  }
+
+  /* ===== Gate (password) ===== */
+  .gate{position:fixed;inset:0;background:rgba(5,7,20,.96);backdrop-filter:blur(20px);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px}
+  .gate__card{max-width:460px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:36px 32px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .gate__card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad)}
+  .gate__kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase;margin-bottom:10px}
+  .gate__title{font-family:var(--display);font-size:28px;font-weight:700;margin:0 0 8px;letter-spacing:-0.01em}
+  .gate__sub{color:var(--muted);font-size:14px;margin:0 0 24px;line-height:1.5}
+  .gate__form{display:flex;flex-direction:column;gap:12px}
+  .gate__input{background:var(--deep);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:14px 16px;color:var(--text);font-family:var(--mono);font-size:14px}
+  .gate__input:focus{outline:none;border-color:var(--cyan)}
+  .gate__btn{background:var(--grad);color:#0a0e27;border:0;padding:14px 16px;border-radius:var(--r-sm);font-weight:700;letter-spacing:.04em;cursor:pointer;font-family:var(--display)}
+  .gate__btn:hover{filter:brightness(1.1)}
+  .gate__error{color:var(--magenta);font-size:13px;font-family:var(--mono);min-height:18px}
+  .gate__hint{color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:14px;line-height:1.5}
+
+  /* ===== Topbar ===== */
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(5,7,20,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+  .topbar__inner{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--white)}
+  .brand__mark{width:32px;height:32px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-family:var(--display);font-weight:800;color:#0a0e27;font-size:16px}
+  .brand__name{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.05em}
+  .brand__sub{color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .topbar__spacer{flex:1}
+  .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--line-2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-size:13px;cursor:pointer;font-family:var(--body);transition:all .15s}
+  .btn:hover{border-color:var(--cyan);color:var(--cyan)}
+  .btn--primary{background:var(--grad);color:#0a0e27;border:0;font-weight:700}
+  .btn--primary:hover{filter:brightness(1.1);color:#0a0e27}
+  .btn--ghost{border-color:transparent;color:var(--muted)}
+  .btn--ghost:hover{color:var(--text);border-color:var(--line)}
+
+  /* ===== Layout ===== */
+  .container{max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1}
+  .header h1{font-family:var(--display);font-weight:700;font-size:38px;margin:0 0 8px;letter-spacing:-0.015em}
+  .header p{color:var(--muted);max-width:780px;margin:0 0 24px;font-size:15px}
+
+  /* ===== Filters ===== */
+  .filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:18px;margin:24px 0;display:grid;gap:14px;grid-template-columns:2fr 1fr 1fr 1fr}
+  .filters label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+  .filters input, .filters select{width:100%;background:var(--deep);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-family:var(--body);font-size:14px}
+  .filters input:focus, .filters select:focus{outline:none;border-color:var(--cyan)}
+  @media (max-width: 880px){ .filters{grid-template-columns:1fr 1fr} }
+  @media (max-width: 520px){ .filters{grid-template-columns:1fr} }
+
+  /* ===== Stats ===== */
+  .stats{display:flex;gap:24px;color:var(--muted);font-family:var(--mono);font-size:12px;margin-bottom:18px;flex-wrap:wrap}
+  .stats span b{color:var(--cyan);font-weight:600}
+
+  /* ===== Cards ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:22px;display:flex;flex-direction:column;gap:14px;position:relative;transition:border-color .15s, transform .15s}
+  .card:hover{border-color:var(--line-2);transform:translateY(-1px)}
+  .card__bar{position:absolute;top:0;left:0;width:100%;height:3px;border-top-left-radius:var(--r-md);border-top-right-radius:var(--r-md);opacity:.85}
+  .card__head{display:flex;justify-content:space-between;align-items:center;color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+  .card__title{font-family:var(--display);font-size:18px;font-weight:600;color:var(--white);margin:0;line-height:1.3}
+  .card__company{font-family:var(--mono);font-size:11px;color:var(--warm);letter-spacing:.04em;text-transform:uppercase}
+  .card__desc{color:var(--text);font-size:13.5px;line-height:1.55;margin:0}
+  .card__tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted)}
+  .tag--rubro{color:var(--cyan);border-color:rgba(0,217,255,.4)}
+  .tag--estado{color:var(--violet);border-color:rgba(177,78,255,.4)}
+  .tag--busca{color:var(--magenta);border-color:rgba(255,61,154,.35)}
+  .card__footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;margin-top:auto}
+  .card__member{display:flex;flex-direction:column;gap:2px}
+  .card__name{color:var(--text);font-size:13px;font-weight:600}
+  .card__socio{color:var(--dim);font-family:var(--mono);font-size:11px}
+  .card__contact{display:inline-flex;align-items:center;gap:6px;background:rgba(0,217,255,.08);border:1px solid rgba(0,217,255,.4);color:var(--cyan);padding:7px 12px;border-radius:var(--r-sm);font-size:12px;cursor:pointer;font-family:var(--body)}
+  .card__contact:hover{background:rgba(0,217,255,.18)}
+  .card__contact--via{background:rgba(255,180,84,.08);border-color:rgba(255,180,84,.4);color:var(--warm)}
+  .card__contact--via:hover{background:rgba(255,180,84,.18)}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:var(--r-md)}
+
+  /* ===== Modal ===== */
+  .modal{position:fixed;inset:0;background:rgba(5,7,20,.88);backdrop-filter:blur(12px);z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px}
+  .modal.open{display:flex}
+  .modal__card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);max-width:680px;width:100%;padding:32px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .modal__card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad)}
+  .modal__close{position:absolute;top:16px;right:16px;background:transparent;border:0;color:var(--muted);font-size:22px;cursor:pointer;width:32px;height:32px;border-radius:6px;display:grid;place-items:center}
+  .modal__close:hover{background:var(--surface);color:var(--text)}
+  .modal__title{font-family:var(--display);font-size:24px;font-weight:700;margin:0 0 6px}
+  .modal__sub{color:var(--muted);margin:0 0 22px;font-size:14px}
+  .form{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+  .form .full{grid-column:1 / -1}
+  .form label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+  .form input, .form select, .form textarea{width:100%;background:var(--deep);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-family:var(--body);font-size:14px;resize:vertical}
+  .form input:focus, .form select:focus, .form textarea:focus{outline:none;border-color:var(--cyan)}
+  .form textarea{min-height:96px}
+  .checkbox-row{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:13px}
+  .checkbox-row input{margin-top:3px;accent-color:var(--cyan)}
+  .modal__actions{display:flex;justify-content:space-between;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .modal__notice{font-family:var(--mono);font-size:11px;color:var(--dim);background:var(--surface);border:1px solid var(--line);padding:12px 14px;border-radius:var(--r-sm);margin-top:14px;line-height:1.5}
+
+  /* ===== Footer ===== */
+  .footer{margin-top:60px;padding:24px;border-top:1px solid var(--line);color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:.04em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  /* ===== Estado colors (card top bar) ===== */
+  .estado-idea{background:var(--warm)}
+  .estado-exploracion{background:var(--cyan)}
+  .estado-buscando{background:var(--magenta)}
+  .estado-marcha{background:var(--violet)}
+
+  /* ===== Utils ===== */
+  .hidden{display:none !important}
+  .sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+
+  <!-- ============= GATE ============= -->
+  <div class="gate" id="gate">
+    <div class="gate__card">
+      <div class="gate__kicker">Acceso restringido</div>
+      <h1 class="gate__title">Idearium</h1>
+      <p class="gate__sub">Banco de proyectos del circulo. Acceso solo para miembros con contrasena.</p>
+      <form class="gate__form" id="gateForm">
+        <input class="gate__input" type="password" id="gatePass" placeholder="Contrasena" autocomplete="off" autofocus />
+        <div class="gate__error" id="gateError"></div>
+        <button class="gate__btn" type="submit">Entrar</button>
+      </form>
+      <p class="gate__hint" id="gateHint"></p>
+    </div>
+  </div>
+
+  <!-- ============= TOPBAR ============= -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#">
+        <div class="brand__mark">I</div>
+        <div>
+          <div class="brand__name" id="brandName">IDEARIUM</div>
+          <div class="brand__sub" id="brandSub">banco de proyectos</div>
+        </div>
+      </a>
+      <div class="topbar__spacer"></div>
+      <div class="top-actions">
+        <button class="btn btn--ghost" id="btnAbout">Como funciona</button>
+        <button class="btn btn--primary" id="btnNewIdea">+ Proponer mi idea</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============= MAIN ============= -->
+  <main class="container">
+    <div class="header">
+      <h1 id="hHeader">Banco de proyectos</h1>
+      <p>Cada tarjeta es una idea o proyecto cargado por un miembro. Filtra por rubro, estado o lo que el autor esta buscando. El contacto se hace por WhatsApp directo si el autor lo autorizo, o via admin en caso contrario.</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div>
+        <label for="search">Buscar</label>
+        <input type="text" id="search" placeholder="Titulo, descripcion, miembro, empresa..." />
+      </div>
+      <div>
+        <label for="filterRubro">Rubro</label>
+        <select id="filterRubro"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label for="filterEstado">Estado</label>
+        <select id="filterEstado"><option value="">Todos</option></select>
+      </div>
+      <div>
+        <label for="filterBusca">Busca</label>
+        <select id="filterBusca"><option value="">Todo</option></select>
+      </div>
+    </div>
+
+    <div class="stats">
+      <span><b id="statCount">0</b> ideas mostradas</span>
+      <span><b id="statTotal">0</b> ideas en total</span>
+      <span><b id="statSocios">0</b> miembros que cargaron</span>
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <div class="empty hidden" id="empty">No hay ideas que coincidan con los filtros aplicados.</div>
+
+    <div class="footer">
+      <span>Idearium · documento interno · uso restringido a miembros del grupo</span>
+      <span id="version">v0.1 · estatica · sin servidor</span>
+    </div>
+  </main>
+
+  <!-- ============= MODAL: Nueva idea ============= -->
+  <div class="modal" id="modalNew">
+    <div class="modal__card">
+      <button class="modal__close" data-close>&times;</button>
+      <h2 class="modal__title">Proponer una idea</h2>
+      <p class="modal__sub">Completa los campos. Al enviar se abrira WhatsApp con un mensaje prellenado al admin con tu idea formateada — el admin la cargara al banco.</p>
+
+      <form class="form" id="formNew">
+        <div>
+          <label for="fMiembro">Tu nombre</label>
+          <input id="fMiembro" required placeholder="Nombre y apellido" />
+        </div>
+        <div>
+          <label for="fSocio">Numero de socio</label>
+          <input id="fSocio" required placeholder="M-0123" />
+        </div>
+        <div>
+          <label for="fTitulo">Titulo de la idea</label>
+          <input id="fTitulo" required placeholder="Una linea que la resuma" />
+        </div>
+        <div>
+          <label for="fEmpresa">Empresa (opcional)</label>
+          <input id="fEmpresa" placeholder="Nombre o vacio si todavia no hay" />
+        </div>
+        <div>
+          <label for="fRubro">Rubro</label>
+          <select id="fRubro" required>
+            <option value="">Elegi...</option>
+            <option>tecnologia</option>
+            <option>salud</option>
+            <option>educacion</option>
+            <option>finanzas</option>
+            <option>industria</option>
+            <option>energia</option>
+            <option>servicios</option>
+            <option>impacto social</option>
+            <option>otros</option>
+          </select>
+        </div>
+        <div>
+          <label for="fEstado">Estado</label>
+          <select id="fEstado" required>
+            <option value="">Elegi...</option>
+            <option>idea</option>
+            <option>exploracion</option>
+            <option>buscando socios</option>
+            <option>en marcha</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="fDesc">Descripcion</label>
+          <textarea id="fDesc" required placeholder="Que es, en que estado esta, que problema resuelve, contexto relevante..."></textarea>
+        </div>
+        <div class="full">
+          <label for="fBusca">Que estas buscando (separado por comas)</label>
+          <input id="fBusca" placeholder="co-founder tecnico, inversor, mentoria regulatoria" />
+        </div>
+        <div>
+          <label for="fTel">Tu telefono</label>
+          <input id="fTel" required placeholder="+54 9 11 0000 0000" />
+        </div>
+        <div class="checkbox-row full">
+          <input type="checkbox" id="fComp" />
+          <label for="fComp" style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:13.5px;color:var(--text);margin:0">
+            Autorizo a que mi telefono aparezca como contacto directo en la tarjeta. Si no marcas esto, los miembros tendran que contactarme via admin.
+          </label>
+        </div>
+        <div class="checkbox-row full">
+          <input type="checkbox" id="fConsent" required />
+          <label for="fConsent" style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:13.5px;color:var(--text);margin:0">
+            Confirmo que la informacion es propia, que entiendo que los datos quedaran visibles para los miembros del grupo, y autorizo su uso interno.
+          </label>
+        </div>
+        <div class="modal__notice full">
+          La idea NO se publica automaticamente. El admin la revisa y la carga al banco. Puede tomar entre 24 y 48 horas.
+        </div>
+        <div class="modal__actions full">
+          <button type="button" class="btn btn--ghost" data-close>Cancelar</button>
+          <button type="submit" class="btn btn--primary">Enviar al admin por WhatsApp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============= MODAL: About ============= -->
+  <div class="modal" id="modalAbout">
+    <div class="modal__card">
+      <button class="modal__close" data-close>&times;</button>
+      <h2 class="modal__title">Como funciona</h2>
+      <ol style="color:var(--text);font-size:14px;line-height:1.65;padding-left:20px">
+        <li><b>Solo miembros del circulo.</b> El acceso esta protegido por contrasena. La pagina no se indexa en buscadores.</li>
+        <li><b>Carga moderada.</b> Cada miembro propone su idea desde el boton "+ Proponer mi idea". Se envia formateada al admin via WhatsApp. El admin la sube al banco una vez verificada.</li>
+        <li><b>Contacto directo opt-in.</b> Si el autor de la idea autorizo mostrar su telefono, aparece un boton de WhatsApp directo. Si no, el contacto pasa por el admin.</li>
+        <li><b>Privacidad.</b> Ningun dato se envia a un servidor externo. Todo vive en un archivo JSON dentro de la propia pagina.</li>
+        <li><b>Filtrar y descubrir.</b> Usa los filtros de rubro, estado, y "que busca el autor" para encontrar ideas afines o oportunidades de colaboracion.</li>
+      </ol>
+      <div class="modal__notice">
+        Esta es una version de trabajo (v0.1). Cuando crezca el volumen, migra a una base con login real y formulario directo. La interfaz va a quedar igual.
+      </div>
+      <div class="modal__actions">
+        <span></span>
+        <button class="btn btn--primary" data-close>Entendido</button>
+      </div>
+    </div>
+  </div>
+
+<script type="application/json" id="inline-data">
+{
+  "config": {
+    "nombreProducto": "IDEARIUM",
+    "subtitulo": "Banco de proyectos del circulo",
+    "adminWhatsApp": "5491100000000",
+    "adminNombre": "Franco",
+    "password": "password",
+    "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+    "passwordHint": "La contrasena por defecto es: password — cambiala en data.json antes de compartir."
+  },
+  "ideas": [
+    {
+      "id": "idea-0001",
+      "miembro": "[Nombre Apellido — ejemplo 1]",
+      "numeroSocio": "M-0001",
+      "fechaCarga": "2026-04-15",
+      "estado": "buscando socios",
+      "rubro": "tecnologia",
+      "titulo": "Plataforma de telemedicina para zonas rurales del NEA",
+      "empresa": "MedeRural (en formacion)",
+      "descripcion": "Sistema de teleconsultas que opera con conectividad intermitente. Almacena consultas localmente y sincroniza cuando hay senal. Pensado para postas sanitarias rurales con un agente capacitado. Modelo B2G + suscripcion para obras sociales rurales.",
+      "buscando": [
+        "co-founder tecnico",
+        "validacion clinica",
+        "mentoria regulatoria"
+      ],
+      "telefono": "+54 9 11 0000 0001",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0002",
+      "miembro": "[Nombre Apellido — ejemplo 2]",
+      "numeroSocio": "M-0014",
+      "fechaCarga": "2026-04-20",
+      "estado": "en marcha",
+      "rubro": "industria",
+      "titulo": "Optimizacion de ruteo logistico con datos en tiempo real",
+      "empresa": "RutaViva SAS",
+      "descripcion": "Software ya operativo con 4 clientes pyme. Reduce kilometros recorridos en distribucion urbana usando trafico, ventanas de entrega y restricciones de carga. Buscamos escalar a operadores logisticos medianos.",
+      "buscando": [
+        "inversor seed",
+        "talento comercial b2b"
+      ],
+      "telefono": "+54 9 11 0000 0002",
+      "compartirTelefono": false
+    },
+    {
+      "id": "idea-0003",
+      "miembro": "[Nombre Apellido — ejemplo 3]",
+      "numeroSocio": "M-0027",
+      "fechaCarga": "2026-04-22",
+      "estado": "exploracion",
+      "rubro": "energia",
+      "titulo": "Generacion solar distribuida con financiamiento comunitario",
+      "empresa": null,
+      "descripcion": "Modelo donde un grupo de vecinos co-financia un parque solar barrial y cobra parte del ahorro generado. Hay marco regulatorio nuevo en provincia de Buenos Aires que lo habilita. Estoy explorando la viabilidad financiera y los aspectos legales antes de avanzar.",
+      "buscando": [
+        "feedback regulatorio",
+        "co-founder financiero",
+        "experiencia con cooperativas"
+      ],
+      "telefono": "+54 9 11 0000 0003",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0004",
+      "miembro": "[Nombre Apellido — ejemplo 4]",
+      "numeroSocio": "M-0042",
+      "fechaCarga": "2026-04-25",
+      "estado": "idea",
+      "rubro": "educacion",
+      "titulo": "Tutorias 1:1 especializadas para chicos con alta capacidad intelectual",
+      "empresa": null,
+      "descripcion": "Plataforma de matching entre chicos identificados con perfil de alta capacidad y tutores con formacion especifica. Modelo subscripcion. Hay demanda no atendida segun mi experiencia familiar y la de varios padres del circulo.",
+      "buscando": [
+        "co-founder pedagogico",
+        "feedback de padres",
+        "validacion de demanda"
+      ],
+      "telefono": "+54 9 11 0000 0004",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0005",
+      "miembro": "[Nombre Apellido — ejemplo 5]",
+      "numeroSocio": "M-0058",
+      "fechaCarga": "2026-04-28",
+      "estado": "buscando socios",
+      "rubro": "finanzas",
+      "titulo": "Capital de trabajo para microempresas usando data alternativa",
+      "empresa": "PrestaPyme (constituida)",
+      "descripcion": "Originamos prestamos de corto plazo a microempresas que no califican en banca tradicional. Usamos data de facturacion electronica de AFIP, datos de movilidad, y comportamiento de pagos en proveedores. Operamos con $3M propios; queremos escalar.",
+      "buscando": [
+        "inversor deuda",
+        "compliance fintech",
+        "talento data"
+      ],
+      "telefono": "+54 9 11 0000 0005",
+      "compartirTelefono": false
+    },
+    {
+      "id": "idea-0006",
+      "miembro": "[Nombre Apellido — ejemplo 6]",
+      "numeroSocio": "M-0071",
+      "fechaCarga": "2026-04-30",
+      "estado": "exploracion",
+      "rubro": "salud",
+      "titulo": "Diagnostico temprano de patologias por analisis de voz",
+      "empresa": "VocalDx (etapa de research)",
+      "descripcion": "Investigacion aplicada — uso modelos de procesamiento de senal y aprendizaje automatico sobre muestras de voz cortas para detectar marcadores de Parkinson temprano y otras enfermedades neurodegenerativas. Hay literatura solida pero pocos productos comerciales. Necesito validar con dataset clinico real.",
+      "buscando": [
+        "acceso a dataset clinico",
+        "co-founder biomedico",
+        "mentoria regulatoria FDA/ANMAT"
+      ],
+      "telefono": "+54 9 11 0000 0006",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0007",
+      "miembro": "[Nombre Apellido — ejemplo 7]",
+      "numeroSocio": "M-0089",
+      "fechaCarga": "2026-05-01",
+      "estado": "en marcha",
+      "rubro": "servicios",
+      "titulo": "Boutique de transformacion digital para pymes industriales",
+      "empresa": "Núcleo Consulting",
+      "descripcion": "Operamos hace 3 anos con 12 clientes activos en Cordoba y Santa Fe. Estamos abriendo unidad en Buenos Aires. Ofrecemos diagnostico de madurez digital + roadmap + ejecucion con equipo propio. Todos los socios son ex-CIOs o ex-CTOs.",
+      "buscando": [
+        "talento senior tech",
+        "alianzas con verticales",
+        "intercambio de ideas"
+      ],
+      "telefono": "+54 9 11 0000 0007",
+      "compartirTelefono": true
+    },
+    {
+      "id": "idea-0008",
+      "miembro": "[Nombre Apellido — ejemplo 8]",
+      "numeroSocio": "M-0103",
+      "fechaCarga": "2026-05-01",
+      "estado": "idea",
+      "rubro": "impacto social",
+      "titulo": "Programa de mentoreo cruzado para emprendedores en barrios vulnerables",
+      "empresa": null,
+      "descripcion": "Idea: vincular emprendedores en etapa temprana de barrios vulnerables del AMBA con mentores empresariales para sesiones cortas de 1 hora cada 15 dias durante 6 meses. La novedad es el formato corto, calendarizado y con metricas de impacto medibles. Estoy buscando primero validar con potenciales mentores y emprendedores.",
+      "buscando": [
+        "co-founder operativo",
+        "ONG aliada",
+        "feedback honesto"
+      ],
+      "telefono": "+54 9 11 0000 0008",
+      "compartirTelefono": false
+    }
+  ]
+}
+</script>
+
+<script>
+  // ===== state =====
+  let DATA = null;
+  let FILTERED = [];
+
+  // ===== utils =====
+  async function sha256(text){
+    const buf = new TextEncoder().encode(text);
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  function el(tag, attrs={}, ...children){
+    const e = document.createElement(tag);
+    for (const [k,v] of Object.entries(attrs)){
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v;
+      else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    }
+    for (const c of children){
+      if (c == null) continue;
+      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    return e;
+  }
+  function uniq(arr){ return Array.from(new Set(arr)).filter(Boolean); }
+  function escapeWa(text){ return encodeURIComponent(text); }
+  function estadoClass(estado){
+    const s = (estado||'').toLowerCase();
+    if (s === 'idea') return 'estado-idea';
+    if (s.startsWith('explor')) return 'estado-exploracion';
+    if (s.startsWith('buscando')) return 'estado-buscando';
+    if (s.startsWith('en marcha')) return 'estado-marcha';
+    return '';
+  }
+
+  // ===== gate =====
+  async function tryUnlock(pass){
+    // Soporta password en texto plano (config.password) o hash SHA-256 (config.passwordHash).
+    // Plain text funciona en cualquier protocolo — file:// puede bloquear crypto.subtle.
+    if (DATA.config.password != null){
+      return pass === DATA.config.password;
+    }
+    if (DATA.config.passwordHash){
+      try { return (await sha256(pass)) === DATA.config.passwordHash; }
+      catch(e){ console.warn('crypto.subtle no disponible'); return false; }
+    }
+    return false;
+  }
+  function showGate(){
+    document.getElementById('gate').style.display = 'flex';
+    const hint = DATA?.config?.passwordHint;
+    if (hint) document.getElementById('gateHint').textContent = hint;
+  }
+  function hideGate(){
+    document.getElementById('gate').style.display = 'none';
+    sessionStorage.setItem('idearium_unlocked', '1');
+  }
+
+  // ===== render =====
+  function buildFilters(){
+    const rubros = uniq(DATA.ideas.map(i => i.rubro)).sort();
+    const estados = uniq(DATA.ideas.map(i => i.estado)).sort();
+    const buscas = uniq(DATA.ideas.flatMap(i => i.buscando || [])).sort();
+    const fr = document.getElementById('filterRubro');
+    const fe = document.getElementById('filterEstado');
+    const fb = document.getElementById('filterBusca');
+    rubros.forEach(r => fr.appendChild(el('option', {value:r}, r)));
+    estados.forEach(s => fe.appendChild(el('option', {value:s}, s)));
+    buscas.forEach(b => fb.appendChild(el('option', {value:b}, b)));
+  }
+
+  function applyFilters(){
+    const q = document.getElementById('search').value.trim().toLowerCase();
+    const r = document.getElementById('filterRubro').value;
+    const s = document.getElementById('filterEstado').value;
+    const b = document.getElementById('filterBusca').value;
+    FILTERED = DATA.ideas.filter(i => {
+      if (r && i.rubro !== r) return false;
+      if (s && i.estado !== s) return false;
+      if (b && !(i.buscando||[]).includes(b)) return false;
+      if (q){
+        const hay = [
+          i.titulo, i.descripcion, i.miembro, i.empresa, i.numeroSocio, i.rubro
+        ].filter(Boolean).join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    render();
+  }
+
+  function render(){
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    grid.innerHTML = '';
+    if (FILTERED.length === 0){
+      empty.classList.remove('hidden');
+    } else {
+      empty.classList.add('hidden');
+      FILTERED.forEach(idea => grid.appendChild(card(idea)));
+    }
+    document.getElementById('statCount').textContent = FILTERED.length;
+    document.getElementById('statTotal').textContent = DATA.ideas.length;
+    document.getElementById('statSocios').textContent = uniq(DATA.ideas.map(i => i.numeroSocio)).length;
+  }
+
+  function card(i){
+    const adminWa = DATA.config.adminWhatsApp;
+    const adminName = DATA.config.adminNombre || 'admin';
+
+    const wa = i.compartirTelefono && i.telefono
+      ? `https://wa.me/${(i.telefono||'').replace(/[^\d]/g,'')}?text=${escapeWa(`Hola ${i.miembro}, te escribo desde Idearium por tu idea "${i.titulo}".`)}`
+      : `https://wa.me/${adminWa}?text=${escapeWa(`Hola ${adminName}, me interesa la idea "${i.titulo}" del socio ${i.numeroSocio}. Podes vincularnos?`)}`;
+    const contactLabel = i.compartirTelefono && i.telefono ? `WhatsApp directo` : `Contactar via ${adminName}`;
+    const contactClass = i.compartirTelefono && i.telefono ? 'card__contact' : 'card__contact card__contact--via';
+
+    const tagsBusca = (i.buscando || []).map(b => el('span', {class:'tag tag--busca'}, b));
+    const headHtml = `<span>${i.numeroSocio}</span><span>${i.fechaCarga || ''}</span>`;
+
+    const bar = el('div', {class: 'card__bar ' + estadoClass(i.estado)});
+    const head = el('div', {class:'card__head', html: headHtml});
+    const company = i.empresa ? el('div', {class:'card__company'}, i.empresa) : null;
+    const title = el('h3', {class:'card__title'}, i.titulo);
+    const desc = el('p', {class:'card__desc'}, i.descripcion);
+    const tags = el('div', {class:'card__tags'},
+      el('span', {class:'tag tag--rubro'}, i.rubro || '—'),
+      el('span', {class:'tag tag--estado'}, i.estado || '—'),
+      ...tagsBusca
+    );
+    const member = el('div', {class:'card__member'},
+      el('span', {class:'card__name'}, i.miembro),
+      el('span', {class:'card__socio'}, i.numeroSocio + (i.compartirTelefono ? '' : ' · contacto privado'))
+    );
+    const contact = el('a', {class: contactClass, href: wa, target: '_blank', rel: 'noopener'}, contactLabel);
+    const footer = el('div', {class:'card__footer'}, member, contact);
+
+    return el('div', {class:'card'}, bar, head, company, title, desc, tags, footer);
+  }
+
+  // ===== modal =====
+  function openModal(id){ document.getElementById(id).classList.add('open'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+  document.addEventListener('click', e => {
+    if (e.target.matches('[data-close]')){
+      const m = e.target.closest('.modal');
+      if (m) m.classList.remove('open');
+    }
+    if (e.target.classList.contains('modal')) e.target.classList.remove('open');
+  });
+
+  // ===== form submit (envia al admin por WhatsApp) =====
+  function buildWhatsAppMessage(form){
+    const lines = [
+      '*Idearium — Nueva idea propuesta*',
+      '',
+      '*Miembro:* ' + form.miembro,
+      '*Numero de socio:* ' + form.socio,
+      '*Estado:* ' + form.estado,
+      '*Rubro:* ' + form.rubro,
+      '',
+      '*Titulo:* ' + form.titulo,
+      form.empresa ? '*Empresa:* ' + form.empresa : '',
+      '',
+      '*Descripcion:*',
+      form.desc,
+      '',
+      '*Que busca:* ' + (form.busca || '—'),
+      '',
+      '*Telefono de contacto:* ' + form.tel,
+      '*Compartir telefono publicamente:* ' + (form.comp ? 'Si' : 'No (contacto via admin)'),
+      '*Consentimiento de uso interno:* Si',
+    ].filter(Boolean);
+    return lines.join('\n');
+  }
+
+  document.getElementById('formNew').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = {
+      miembro: document.getElementById('fMiembro').value.trim(),
+      socio: document.getElementById('fSocio').value.trim(),
+      titulo: document.getElementById('fTitulo').value.trim(),
+      empresa: document.getElementById('fEmpresa').value.trim(),
+      rubro: document.getElementById('fRubro').value,
+      estado: document.getElementById('fEstado').value,
+      desc: document.getElementById('fDesc').value.trim(),
+      busca: document.getElementById('fBusca').value.trim(),
+      tel: document.getElementById('fTel').value.trim(),
+      comp: document.getElementById('fComp').checked,
+    };
+    const msg = buildWhatsAppMessage(form);
+    const url = `https://wa.me/${DATA.config.adminWhatsApp}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank', 'noopener');
+    closeModal('modalNew');
+    document.getElementById('formNew').reset();
+  });
+
+  // ===== boot =====
+  async function boot(){
+    // 1) si hay datos inline (modo file:// / standalone), los uso
+    const inline = document.getElementById('inline-data');
+    if (inline && inline.textContent.trim()){
+      try { DATA = JSON.parse(inline.textContent); }
+      catch(e){ console.warn('inline-data invalido', e); }
+    }
+    // 2) si no hay inline o estoy via http(s), intento data.json (modo server)
+    if (!DATA && location.protocol !== 'file:'){
+      try {
+        const res = await fetch('data.json', {cache:'no-store'});
+        if (res.ok) DATA = await res.json();
+      } catch(err){ /* ignoro y caigo al fallback */ }
+    }
+    if (!DATA){
+      document.body.innerHTML = '<div style="padding:32px;color:#FF3D9A;font-family:monospace">Error: no se pudieron cargar los datos. Si abriste el archivo con doble clic, asegurate de tener el bloque inline-data poblado, o usa un servidor local (python -m http.server).</div>';
+      return;
+    }
+
+    document.getElementById('brandName').textContent = DATA.config.nombreProducto || 'IDEARIUM';
+    document.getElementById('brandSub').textContent = DATA.config.subtitulo || '';
+
+    if (sessionStorage.getItem('idearium_unlocked') === '1'){
+      hideGate();
+    } else {
+      showGate();
+    }
+
+    document.getElementById('gateForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const pass = document.getElementById('gatePass').value;
+      const ok = await tryUnlock(pass);
+      if (ok){
+        document.getElementById('gateError').textContent = '';
+        hideGate();
+      } else {
+        document.getElementById('gateError').textContent = 'Contrasena incorrecta.';
+      }
+    });
+
+    buildFilters();
+    applyFilters();
+
+    document.getElementById('search').addEventListener('input', applyFilters);
+    document.getElementById('filterRubro').addEventListener('change', applyFilters);
+    document.getElementById('filterEstado').addEventListener('change', applyFilters);
+    document.getElementById('filterBusca').addEventListener('change', applyFilters);
+
+    document.getElementById('btnNewIdea').addEventListener('click', () => openModal('modalNew'));
+    document.getElementById('btnAbout').addEventListener('click', () => openModal('modalAbout'));
+  }
+  boot();
+</script>
+</body>
+</html>
+ment.getElementById('filterEstado').addEventListener('change', applyFilters);
+    document.getElementById('filterBusca').addEventListener('change', applyFilters);
+
+    document.getElementById('btnNewIdea').addEventListener('click', () => openModal('modalNew'));
+    document.getElementById('btnAbout').addEventListener('click', () => openModal('modalAbout'));
+  }
+  boot();
+</script>
+</body>
+</html>
