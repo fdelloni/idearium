@@ -34,20 +34,6 @@
       radial-gradient(ellipse at 50% 50%, rgba(255,61,154,.06), transparent 60%);
   }
 
-  /* ===== Gate (password) ===== */
-  .gate{position:fixed;inset:0;background:rgba(5,7,20,.96);backdrop-filter:blur(20px);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px}
-  .gate__card{max-width:460px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:36px 32px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-  .gate__card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad)}
-  .gate__kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase;margin-bottom:10px}
-  .gate__title{font-family:var(--display);font-size:28px;font-weight:700;margin:0 0 8px;letter-spacing:-0.01em}
-  .gate__sub{color:var(--muted);font-size:14px;margin:0 0 24px;line-height:1.5}
-  .gate__form{display:flex;flex-direction:column;gap:12px}
-  .gate__input{background:var(--deep);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:14px 16px;color:var(--text);font-family:var(--mono);font-size:14px}
-  .gate__input:focus{outline:none;border-color:var(--cyan)}
-  .gate__btn{background:var(--grad);color:#0a0e27;border:0;padding:14px 16px;border-radius:var(--r-sm);font-weight:700;letter-spacing:.04em;cursor:pointer;font-family:var(--display)}
-  .gate__btn:hover{filter:brightness(1.1)}
-  .gate__error{color:var(--magenta);font-size:13px;font-family:var(--mono);min-height:18px}
-  .gate__hint{color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:14px;line-height:1.5}
 
   /* ===== Topbar ===== */
   .topbar{position:sticky;top:0;z-index:20;background:rgba(5,7,20,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
@@ -142,21 +128,6 @@
 </style>
 </head>
 <body>
-
-  <!-- ============= GATE ============= -->
-  <div class="gate" id="gate">
-    <div class="gate__card">
-      <div class="gate__kicker">Acceso restringido</div>
-      <h1 class="gate__title">Idearium</h1>
-      <p class="gate__sub">Banco de proyectos del circulo. Acceso solo para miembros con contrasena.</p>
-      <form class="gate__form" id="gateForm">
-        <input class="gate__input" type="password" id="gatePass" placeholder="Contrasena" autocomplete="off" autofocus />
-        <div class="gate__error" id="gateError"></div>
-        <button class="gate__btn" type="submit">Entrar</button>
-      </form>
-      <p class="gate__hint" id="gateHint"></p>
-    </div>
-  </div>
 
   <!-- ============= TOPBAR ============= -->
   <header class="topbar">
@@ -489,11 +460,6 @@
   let FILTERED = [];
 
   // ===== utils =====
-  async function sha256(text){
-    const buf = new TextEncoder().encode(text);
-    const hash = await crypto.subtle.digest('SHA-256', buf);
-    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
-  }
   function el(tag, attrs={}, ...children){
     const e = document.createElement(tag);
     for (const [k,v] of Object.entries(attrs)){
@@ -517,29 +483,6 @@
     if (s.startsWith('buscando')) return 'estado-buscando';
     if (s.startsWith('en marcha')) return 'estado-marcha';
     return '';
-  }
-
-  // ===== gate =====
-  async function tryUnlock(pass){
-    // Soporta password en texto plano (config.password) o hash SHA-256 (config.passwordHash).
-    // Plain text funciona en cualquier protocolo — file:// puede bloquear crypto.subtle.
-    if (DATA.config.password != null){
-      return pass === DATA.config.password;
-    }
-    if (DATA.config.passwordHash){
-      try { return (await sha256(pass)) === DATA.config.passwordHash; }
-      catch(e){ console.warn('crypto.subtle no disponible'); return false; }
-    }
-    return false;
-  }
-  function showGate(){
-    document.getElementById('gate').style.display = 'flex';
-    const hint = DATA?.config?.passwordHint;
-    if (hint) document.getElementById('gateHint').textContent = hint;
-  }
-  function hideGate(){
-    document.getElementById('gate').style.display = 'none';
-    sessionStorage.setItem('idearium_unlocked', '1');
   }
 
   // ===== render =====
@@ -702,24 +645,6 @@
 
     document.getElementById('brandName').textContent = DATA.config.nombreProducto || 'IDEARIUM';
     document.getElementById('brandSub').textContent = DATA.config.subtitulo || '';
-
-    if (sessionStorage.getItem('idearium_unlocked') === '1'){
-      hideGate();
-    } else {
-      showGate();
-    }
-
-    document.getElementById('gateForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const pass = document.getElementById('gatePass').value;
-      const ok = await tryUnlock(pass);
-      if (ok){
-        document.getElementById('gateError').textContent = '';
-        hideGate();
-      } else {
-        document.getElementById('gateError').textContent = 'Contrasena incorrecta.';
-      }
-    });
 
     buildFilters();
     applyFilters();
